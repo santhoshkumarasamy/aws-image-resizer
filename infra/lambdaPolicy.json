@@ -1,0 +1,25 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Sid": "Stmt1729948809678",
+        "Action": "s3:*",
+        "Effect": "Allow",
+        "Resource": "*"
+      },
+      {
+        "Sid": "Stmt1729948831506",
+        "Action": "sns:*",
+        "Effect": "Allow",
+        "Resource": "*"
+      },
+      {
+        "Sid": "Stmt1729948941958",
+        "Action": [
+          "lambda:GetLayerVersion"
+        ],
+        "Effect": "Allow",
+        "Resource": "*"
+      }
+    ]
+  }
