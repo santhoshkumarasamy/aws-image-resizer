@@ -5,6 +5,8 @@ Reference
 
 https://towardsaws.com/boost-your-resume-with-this-five-aws-projects-easy-intermediate-and-expert-levels-with-6224eef9e2ae
 
+https://repost.aws/knowledge-center/lambda-import-module-error-python
+
 ```
 Step 1 Create a 2 AWS bucket, one to store the uploaded images and another to store resized images
 Step 2 Create S3 event notification to call lambda.

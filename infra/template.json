@@ -37,6 +37,19 @@
                             "ExpirationInDays": 1
                         }
                     ]
+                },
+                "NotificationConfiguration": {
+                    "LambdaConfigurations": [
+                        {
+                            "Event": "s3:ObjectCreated:*",
+                            "Function": {
+                                "Fn::GetAtt": [
+                                    "lambdaFunction",
+                                    "Arn"
+                                ]
+                            }
+                        }
+                    ]
                 }
             }
         },
@@ -104,19 +117,25 @@
                             ]
                         }
                     }
+                ],
+                "ManagedPolicyArns":[
+                    "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
                 ]
             }
         },
-        "lambdaPillowLayer":{
-            "Type" : "AWS::Lambda::LayerVersion",
-            "Properties" : {
-                "Content" : {
-                    "S3Bucket" : "project1-lambda-resources",
-                    "S3Key" : "pillow_lambda_layer.zip"
-                  },
-                "LayerName" : "Pillowlayer"
-              }
-          },
+        "lambdaPillowLayer": {
+            "Type": "AWS::Lambda::LayerVersion",
+            "Properties": {
+                "Content": {
+                    "S3Bucket": "project1-lambda-resources",
+                    "S3Key": "pillow_lambda_layer.zip"
+                },
+                "LayerName": "Pillowlayer",
+                "CompatibleRuntimes": [
+                    "python3.10"
+                ]
+            }
+        },
         "lambdaFunction": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
@@ -128,19 +147,15 @@
                     ]
                 },
                 "Code": {
-                    "S3Bucket":"project1-lambda-resources",
-                    "S3Key":"lambda.zip"
+                    "S3Bucket": "project1-lambda-resources",
+                    "S3Key": "lambda.zip"
                 },
-                "Runtime": "python3.9",
+                "Runtime": "python3.10",
                 "Timeout": 25,
                 "Environment": {
                     "Variables": {
-                        "BUCKET_1": {
-                            "Ref": "uploadedImageBucket"
-                        },
-                        "BUCKET_2": {
-                            "Ref": "resizedImageBucket"
-                        },
+                        "BUCKET_1": "project1-uploaded-image-bucket",
+                        "BUCKET_2": "project1-resized-image-bucket",
                         "SNS_TOPIC_ARN": {
                             "Fn::GetAtt": [
                                 "snsEmailNotification",
@@ -149,12 +164,39 @@
                         }
                     }
                 },
-                "Layers":[
+                "Layers": [
                     {
-                       "Ref": "lambdaPillowLayer" 
+                        "Ref": "lambdaPillowLayer"
                     }
-                ]
+                ],
+                "LoggingConfig":{
+                    "LogGroup" : {
+                        "Ref":"lambdaLogGroup"
+                    }
+                  }
             }
-        }
+        },
+        "lambdaPermission": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "Action": "lambda:InvokeFunction",
+                "FunctionName": {
+                    "Ref": "lambdaFunction"
+                },
+                "SourceArn": {
+                    "Fn::GetAtt": [
+                        "uploadedImageBucket",
+                        "Arn"
+                    ]
+                },
+                "Principal":"s3.amazonaws.com"
+            }
+        },
+        "lambdaLogGroup":{
+            "Type" : "AWS::Logs::LogGroup",
+            "Properties" : {
+                "LogGroupName" : "p1-image-resizing-lambda"
+              }
+          }
     }
 }
